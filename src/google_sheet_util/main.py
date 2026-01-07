@@ -13,6 +13,7 @@ from .utils import Secret
 class GoogleSheet:
     def __init__(self, credentials: Optional[Path] = None, token: Optional[Path] = None, spreadsheet_id: Optional[str] = None):
         self.SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+        self.secret = Secret()
         self.token = token
         self.credentials = credentials
         self.spreadsheet_id = spreadsheet_id
@@ -21,9 +22,8 @@ class GoogleSheet:
             print("No existe el archivo 'secrets/credentials.json'")
             credentials_path = self.input_credentials_filepath()
 
-            secret = Secret()
-            secret.add_secret(credentials_path)
-            self.credentials = secret.get_credentials()
+           self.secret.add_secret(credentials_path)
+            self.credentials = self.secret.get_credentials()
 
     def input_credentials_filepath(self) -> Optional[Path]:
         try:
@@ -46,6 +46,7 @@ class GoogleSheet:
 
             with open(self.token, 'w') as token:
                 token.write(creds.to_json())
+                self.token = self.secrets.get_token()
 
         return build('sheets', 'v4', credentials=creds)
 

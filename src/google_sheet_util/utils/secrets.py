@@ -15,6 +15,9 @@ class Secret:
     def get_credentials(self):
         return self.SECRETS_PATH / "credentials.json"
 
+    def get_token(self):
+        return self.SECRETS_PATH / "token.json"
+
     def add_secret(self, filepath: Path):
         try:
             with filepath.open("r", encoding="utf-8") as source_file:
