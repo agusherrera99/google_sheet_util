@@ -12,6 +12,9 @@ class Secret:
         self.SECRETS_PATH = base_path / "secrets"
         self.SECRETS_PATH.mkdir(parents=True, exist_ok=True)
 
+    def get_credentials(self):
+        return self.SECRETS_PATH / "credentials.json"
+
     def add_secret(self, filepath: Path):
         try:
             with filepath.open("r", encoding="utf-8") as source_file:

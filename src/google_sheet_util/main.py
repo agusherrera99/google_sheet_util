@@ -20,7 +20,10 @@ class GoogleSheet:
         if self.credentials is None or not self.credentials.exists():
             print("No existe el archivo 'secrets/credentials.json'")
             credentials_path = self.input_credentials_filepath()
-            Secret().add_secret(credentials_path)
+
+            secret = Secret()
+            secret.add_secret(credentials_path)
+            self.credentials = secret.get_credentials()
 
     def input_credentials_filepath(self) -> Optional[Path]:
         try:
