@@ -22,7 +22,7 @@ class GoogleSheet:
             print("No existe el archivo 'secrets/credentials.json'")
             credentials_path = self.input_credentials_filepath()
 
-           self.secret.add_secret(credentials_path)
+            self.secret.add_secret(credentials_path)
             self.credentials = self.secret.get_credentials()
 
     def input_credentials_filepath(self) -> Optional[Path]:
