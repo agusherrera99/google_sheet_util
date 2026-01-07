@@ -17,7 +17,7 @@ class GoogleSheet:
         self.credentials = credentials
         self.spreadsheet_id = spreadsheet_id
 
-        if self.credentials and not self.credentials.exists():
+        if self.credentials is None and not self.credentials.exists():
             print("No existe el archivo 'secrets/credentials.json'")
             credentials_path = self.input_credentials_filepath()
             Secret().add_secret(credentials_path)
@@ -31,7 +31,7 @@ class GoogleSheet:
 
     def get_sheet_services(self):
         creds = None
-        if self.token and self.token.exists():
+        if self.token is None and self.token.exists():
             creds = Credentials.from_authorized_user_file(self.token, self.SCOPES)
 
         if not creds or not creds.valid:
