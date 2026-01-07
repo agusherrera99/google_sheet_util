@@ -1,6 +1,6 @@
 import os
 
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional
 from pathlib import Path
 
 from google.oauth2.credentials import Credentials
@@ -22,7 +22,7 @@ class GoogleSheet:
             credentials_path = self.input_credentials_filepath()
             Secrets().add_secret(credentials_path)
 
-    def input_credentials_filepath(self) Optional[Path]:
+        def input_credentials_filepath(self) -> Optional[Path]:
         try:
             return Path(input("Escribe la ubicacion del archivo (/home/usuario/Download/nombre_del_archivo.json): "))
         except Exception as error:
