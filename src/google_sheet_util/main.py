@@ -1,13 +1,14 @@
 import os
 
 from typing import Dict, List, Union
+from pathlib import Path
 
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
-from .utils import project_paths
+from .utils import project_paths, Secrets
 
 class GoogleSheet:
     def __init__(self, spreadsheet_id: str = None):
@@ -16,9 +17,21 @@ class GoogleSheet:
         self.credentials = project_paths.get_secrets() / 'credentials.json'
         self.spreadsheet_id = spreadsheet_id
 
+        if not self.credentials.exists():
+            print("No existe el archivo 'secrets/credentials.json'")
+            credentials_path = self.input_credentials_filepath()
+            Secrets().add_secret(credentials_path)
+
+    def input_credentials_filepath(self) Optional[Path]:
+        try:
+            return Path(input("Escribe la ubicacion del archivo (/home/usuario/Download/nombre_del_archivo.json): "))
+        except Exception as error:
+            print(f"Error al ingresar la ubicacion del archivo de credenciales: {error}")
+            return None
+
     def get_sheet_services(self):
         creds = None
-        if os.path.exists(self.token):
+        if self.have_token():
             creds = Credentials.from_authorized_user_file(self.token, self.SCOPES)
 
         if not creds or not creds.valid:
