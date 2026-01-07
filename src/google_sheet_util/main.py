@@ -8,13 +8,13 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
-from .utils import project_paths, Secret
+from .utils import Secret
 
 class GoogleSheet:
-    def __init__(self, spreadsheet_id: str = None):
+    def __init__(self, credentials: Optional[Path] = None, token: Optional[Path] = None, spreadsheet_id: Optional[str] = None):
         self.SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-        self.token = project_paths.get_secrets() / 'token.json'
-        self.credentials = project_paths.get_secrets() / 'credentials.json'
+        self.token = token
+        self.credentials = credentials
         self.spreadsheet_id = spreadsheet_id
 
         if not self.credentials.exists():

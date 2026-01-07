@@ -2,11 +2,15 @@ import json
 
 from pathlib import Path, PosixPath
 
-from .paths import project_paths
-
 class Secret:
-    def __init__(self):
-        self.SECRETS_PATH = project_paths.get_secrets()
+    def __init__(self, base_path=None):
+        if base_path is None:
+            base_path = Path.cwd()
+        else:
+            base_path = Path(base_path)
+
+        self.SECRETS_PATH = base_path / "secrets"
+        self.SECRETS_PATH.mkdir(parents=True, exist_ok=True)
 
     def get_content(self, filepath: Path):
         try:
