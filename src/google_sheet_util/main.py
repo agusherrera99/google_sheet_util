@@ -8,7 +8,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
-from .utils import project_paths, Secrets
+from .utils import project_paths, Secret
 
 class GoogleSheet:
     def __init__(self, spreadsheet_id: str = None):
@@ -20,7 +20,7 @@ class GoogleSheet:
         if not self.credentials.exists():
             print("No existe el archivo 'secrets/credentials.json'")
             credentials_path = self.input_credentials_filepath()
-            Secrets().add_secret(credentials_path)
+            Secret().add_secret(credentials_path)
 
         def input_credentials_filepath(self) -> Optional[Path]:
             try:
