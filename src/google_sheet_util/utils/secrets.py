@@ -1,6 +1,6 @@
 import json
 
-from pathlib import PosixPath
+from pathlib import Path, PosixPath
 
 from .paths import project_paths
 
