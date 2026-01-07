@@ -7,7 +7,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
-from utils import project_paths
+from .utils import project_paths
 
 class GoogleSheet:
     def __init__(self, spreadsheet_id: str = None):
