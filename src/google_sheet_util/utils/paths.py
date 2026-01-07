@@ -9,5 +9,3 @@ class ProjectPaths:
         return self.SECRETS_PATH
 
 project_paths = ProjectPaths()
-print(project_paths.ROOT_PATH)
-print(project_paths.SECRETS_PATH)
