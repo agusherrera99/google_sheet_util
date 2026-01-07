@@ -37,7 +37,7 @@ class GoogleSheet:
 
     def get_sheet_services(self):
         creds = None
-        if self.token is None None and self.token.exists():
+        if self.token is not None and self.token.exists():
             creds = Credentials.from_authorized_user_file(self.token, self.SCOPES)
 
         if not creds or not creds.valid:
