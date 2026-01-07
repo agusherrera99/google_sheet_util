@@ -22,12 +22,12 @@ class GoogleSheet:
             credentials_path = self.input_credentials_filepath()
             Secret().add_secret(credentials_path)
 
-        def input_credentials_filepath(self) -> Optional[Path]:
-            try:
-                return Path(input("Escribe la ubicacion del archivo (/home/usuario/Download/nombre_del_archivo.json): "))
-            except Exception as error:
-                print(f"Error al ingresar la ubicacion del archivo de credenciales: {error}")
-                return None
+    def input_credentials_filepath(self) -> Optional[Path]:
+        try:
+            return Path(input("Escribe la ubicacion del archivo (/home/usuario/Download/nombre_del_archivo.json): "))
+        except Exception as error:
+            print(f"Error al ingresar la ubicacion del archivo de credenciales: {error}")
+            return None
 
     def get_sheet_services(self):
         creds = None
