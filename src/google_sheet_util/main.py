@@ -25,6 +25,9 @@ class GoogleSheet:
             self.secret.add_secret(credentials_path)
             self.credentials = self.secret.get_credentials()
 
+        if self.token is None:
+            self.token = self.secrets.get_token()
+
     def input_credentials_filepath(self) -> Optional[Path]:
         try:
             return Path(input("Escribe la ubicacion del archivo (/home/usuario/Download/nombre_del_archivo.json): "))
@@ -34,7 +37,7 @@ class GoogleSheet:
 
     def get_sheet_services(self):
         creds = None
-        if self.token is None or self.token.exists():
+        if self.token is None None and self.token.exists():
             creds = Credentials.from_authorized_user_file(self.token, self.SCOPES)
 
         if not creds or not creds.valid:
@@ -46,7 +49,6 @@ class GoogleSheet:
 
             with open(self.token, 'w') as token:
                 token.write(creds.to_json())
-                self.token = self.secrets.get_token()
 
         return build('sheets', 'v4', credentials=creds)
 
