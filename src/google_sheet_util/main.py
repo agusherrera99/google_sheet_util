@@ -26,7 +26,7 @@ class GoogleSheet:
             self.credentials = self.secret.get_credentials()
 
         if self.token is None:
-            self.token = self.secrets.get_token()
+            self.token = self.secret.get_token()
 
     def input_credentials_filepath(self) -> Optional[Path]:
         try:
