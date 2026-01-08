@@ -134,7 +134,7 @@ class GoogleSheet:
             print(f"Error al actualizar el formato: {error}")
 
 
-    def upload_to_sheets(self, fieldnames: List[str], data_dicts: List[Dict[str, Union[str, int]]]):
+    def upload_to_sheets(self, fieldnames: List[str], data_dicts: List[Dict[str, Union[str, int]]], column_formats: Dict[str, str]):
         if not self.spreadsheet_id:
             print("No se ha creado un spreadsheet. No se pueden cargar los datos.")
             return
@@ -163,9 +163,17 @@ class GoogleSheet:
                 body=body
             )
             response = request.execute()
-            print(f"Datos subidos correctamente: {response}")
 
-            self.format_column(self.spreadsheet_id, range_, "date")
-            self.format_column(self.spreadsheet_id, range_, "currency")
+            for index, field in enumerate(fieldnames):
+                format_type = column_formats.get(field, "number")
+
+                if format_type == "currency":
+                    self.format_column(self.spreadsheet_id, range_, "currency", index, index + 1)
+                elif format_type == "date":
+                    self.format_column(self.spreadsheet_id, range_, "date", index, index + 1)
+                elif format_type == "number":
+                    self.format_column(self.spreadsheet_id, range_, "number", index, index + 1)
+
+            print(f"Datos subidos correctamente: {response}")
         except Exception as error:
             print(f"Error al cargar los datos: {error}")
