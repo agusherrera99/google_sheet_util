@@ -52,7 +52,7 @@ class GoogleSheet:
 
         return build('sheets', 'v4', credentials=creds)
 
-    def format_column(self, spreadsheet_id, range_, format_type):
+    def format_column(self, spreadsheet_id, range_, format_type, start_col, end_col):
         service = self.get_sheet_services()
         
         sheet_metadata = service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
@@ -64,8 +64,8 @@ class GoogleSheet:
                 "repeatCell": {
                     "range": {
                         "sheetId": sheet_id,
-                        "startColumnIndex": 0,
-                        "endColumnIndex": 1,
+                        "startColumnIndex": start_col,
+                        "endColumnIndex": end_col,
                     },
                     "cell": {
                         "userEnteredFormat": {
@@ -83,8 +83,8 @@ class GoogleSheet:
                 "repeatCell": {
                     "range": {
                         "sheetId": sheet_id,
-                        "startColumnIndex": 1,
-                        "endColumnIndex": 2,
+                        "startColumnIndex": start_col,
+                        "endColumnIndex": end_col,
                     },
                     "cell": {
                         "userEnteredFormat": {
@@ -97,6 +97,26 @@ class GoogleSheet:
                     "fields": "userEnteredFormat.numberFormat"
                 }
             }
+        elif format_type == "number":
+            format_request = {
+                "repeatCell": {
+                    "range": {
+                        "sheetId": sheet_id,
+                        "startColumnIndex": start_col,
+                        "endColumnIndex": end_col,
+                    },
+                    "cell": {
+                        "userEnteredFormat": {
+                            "numberFormat": {
+                                "type": "NUMBER",
+                                "pattern": "#,##0.00"
+                            }
+                        }
+                    },
+                    "fields": "userEnteredFormat.numberFormat"
+                }
+            }
+
         else:
             print("Tipo de formato no soportado")
             return
