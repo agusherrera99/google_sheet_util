@@ -175,13 +175,15 @@ class GoogleSheet:
             print(f"Error al cargar los datos: {error}")
             raise
 
-    def read_sheet(self):
+    def read_sheet(self, sheet_name: str, range_value: str):
         service = self.get_sheet_services()
         rows = []
+        range_ = f"{sheet_name}!{range_value}"
 
         try:
             request = service.spreadsheets().values().get(
                 spreadsheetId=self.spreadsheet_id,
+                range=range_
             )
             response = request.execute()
 
