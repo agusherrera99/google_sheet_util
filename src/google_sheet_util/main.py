@@ -177,3 +177,26 @@ class GoogleSheet:
             print(f"Datos subidos correctamente: {response}")
         except Exception as error:
             print(f"Error al cargar los datos: {error}")
+            raise
+
+    def read_sheet(self):
+        service = self.get_sheet_services()
+        rows = []
+
+        try:
+            request = service.spreadsheets().values().get(
+                spreadsheetId=self.spreadsheet_id,
+            )
+            response = request.execute()
+
+            values = response.get("values", [])
+            if not values:
+                prit("No data found.")
+                return
+
+            for row in values:
+                rows.append(row)
+            return rows
+        except Exception as error:
+            print(f"Error al leer los datos: {error}")
+            raise
