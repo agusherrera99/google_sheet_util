@@ -14,19 +14,15 @@ class GoogleSheet:
     def __init__(self, credentials: Optional[Path] = None, token: Optional[Path] = None, spreadsheet_id: Optional[str] = None):
         self.SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
         self.secret = Secret()
-        self.token = token
-        self.credentials = credentials
+        self.token = token or self.secret.get_token()
+        self.credentials = credentials or self.secret.get_credentials()
         self.spreadsheet_id = spreadsheet_id
 
         if self.credentials is None or not self.credentials.exists():
             print("No existe el archivo 'secrets/credentials.json'")
+
             credentials_path = self.input_credentials_filepath()
-
             self.secret.add_secret(credentials_path)
-            self.credentials = self.secret.get_credentials()
-
-        if self.token is None:
-            self.token = self.secret.get_token()
 
     def input_credentials_filepath(self) -> Optional[Path]:
         try:
