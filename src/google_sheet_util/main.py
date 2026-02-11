@@ -1,9 +1,11 @@
+import json
 import os
 
 from typing import Dict, List, Union, Optional
 from pathlib import Path
 
 from google.oauth2.credentials import Credentials
+from google.oauth2 import service_account
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
@@ -31,26 +33,9 @@ class GoogleSheet:
             print(f"Error al ingresar la ubicacion del archivo de credenciales: {error}")
             return None
 
-    def get_sheet_services(self):
-        creds = None
-        if self.token is not None and self.token.exists():
-            creds = Credentials.from_authorized_user_file(self.token, self.SCOPES)
-
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(self.credentials, self.SCOPES)
-                creds = flow.run_local_server(port=0)
-
-            with open(self.token, 'w') as token:
-                token.write(creds.to_json())
-
-        return build('sheets', 'v4', credentials=creds)
-
     def format_column(self, spreadsheet_id, range_, format_type, start_col, end_col):
-        service = self.get_sheet_services()
-        
+        service = self._get_sheet_services()
+
         sheet_metadata = service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
         sheets = sheet_metadata.get('sheets', [])
         sheet_id = sheets[0]['properties']['sheetId']
@@ -135,7 +120,7 @@ class GoogleSheet:
             print("No se ha creado un spreadsheet. No se pueden cargar los datos.")
             return
 
-        service = self.get_sheet_services()
+        service = self._get_sheet_services()
 
         values = [fieldnames]  # Encabezados
         for row in data_dicts:
@@ -176,7 +161,7 @@ class GoogleSheet:
             raise
 
     def read_sheet(self, sheet_name: str, range_value: str):
-        service = self.get_sheet_services()
+        service = self._get_sheet_services()
         rows = []
         range_ = f"{sheet_name}!{range_value}"
 
@@ -197,4 +182,35 @@ class GoogleSheet:
             return rows
         except Exception as error:
             print(f"Error al leer los datos: {error}")
+            raise
+
+    def _get_sheet_services(self):
+        creds = None
+        try:
+            with open(self.credentials, 'r') as file:
+                creds_data = json.load(file)
+
+            if creds_data.get('type') == 'service_account':
+                creds = service_account.Credentials.from_service_account_info(
+                    creds_data, scopes=self.SCOPES
+                )
+                return build('sheets', 'v4', credentials=creds)
+
+            if self.token and self.token.exists():
+                creds = Credentials.from_authorized_user_file(self.token, self.SCOPES)
+
+            if not creds or not creds.valid:
+                if creds and creds.expired and creds.refresh_token:
+                    creds.refresh(Request())
+                else:
+                    flow = InstalledAppFlow.from_client_secrets_file(self.credentials, self.SCOPES)
+                    creds = flow.run_local_server(port=0)
+
+                with open(self.token, 'w') as token:
+                    token.write(creds.to_json())
+
+            return build('sheets', 'v4', credentials=creds)
+
+        except Exception as e:
+            print(f"Error crítico al obtener servicios de Google Sheets: {e}")
             raise
