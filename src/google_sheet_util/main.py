@@ -115,7 +115,7 @@ class GoogleSheet:
             print(f"Error al actualizar el formato: {error}")
 
 
-    def upload_to_sheets(self, fieldnames: List[str], data_dicts: List[Dict[str, Union[str, int]]], column_formats: Dict[str, str]):
+    def upload_to_sheets(self, fieldnames: List[str], data_dicts: List[Dict[str, Union[str, int]]], column_formats: Dict[str, str], range_value: str):
         if not self.spreadsheet_id:
             print("No se ha creado un spreadsheet. No se pueden cargar los datos.")
             return
@@ -131,7 +131,7 @@ class GoogleSheet:
 
             sheets = sheet_metadata.get('sheets', [])
             sheet_name = sheets[0]['properties']['title']
-            range_ = f'{sheet_name}!A1'
+            range_value = f'{sheet_name}!{range_value}'
 
             body = {
                 'values': values
@@ -139,7 +139,7 @@ class GoogleSheet:
 
             request = service.spreadsheets().values().update(
                 spreadsheetId=self.spreadsheet_id,
-                range=range_,
+                range=range_value,
                 valueInputOption="RAW",
                 body=body
             )
@@ -149,11 +149,11 @@ class GoogleSheet:
                 format_type = column_formats.get(field, "number")
 
                 if format_type == "currency":
-                    self.format_column(self.spreadsheet_id, range_, "currency", index, index + 1)
+                    self.format_column(self.spreadsheet_id, range_value, "currency", index, index + 1)
                 elif format_type == "date":
-                    self.format_column(self.spreadsheet_id, range_, "date", index, index + 1)
+                    self.format_column(self.spreadsheet_id, range_value, "date", index, index + 1)
                 elif format_type == "number":
-                    self.format_column(self.spreadsheet_id, range_, "number", index, index + 1)
+                    self.format_column(self.spreadsheet_id, range_value, "number", index, index + 1)
 
             print(f"Datos subidos correctamente: {response}")
         except Exception as error:
