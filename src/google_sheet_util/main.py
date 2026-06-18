@@ -33,7 +33,7 @@ class GoogleSheet:
             print(f"Error al ingresar la ubicacion del archivo de credenciales: {error}")
             return None
 
-def format_column(self, sheet_id, format_type, start_col, end_col):
+    def format_column(self, sheet_id, format_type, start_col, end_col):
         """Genera la estructura del request de formato sin ejecutarla."""
         patterns = {
             "date": {"type": "DATE", "pattern": "yyyy-mm-dd"},
