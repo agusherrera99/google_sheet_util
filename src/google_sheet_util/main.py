@@ -33,86 +33,32 @@ class GoogleSheet:
             print(f"Error al ingresar la ubicacion del archivo de credenciales: {error}")
             return None
 
-    def format_column(self, spreadsheet_id, range_, format_type, start_col, end_col):
-        service = self._get_sheet_services()
-
-        sheet_metadata = service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
-        sheets = sheet_metadata.get('sheets', [])
-        sheet_id = sheets[0]['properties']['sheetId']
-
-        if format_type == "date":
-            format_request = {
-                "repeatCell": {
-                    "range": {
-                        "sheetId": sheet_id,
-                        "startColumnIndex": start_col,
-                        "endColumnIndex": end_col,
-                    },
-                    "cell": {
-                        "userEnteredFormat": {
-                            "numberFormat": {
-                                "type": "DATE",
-                                "pattern": "yyyy-mm-dd"
-                            }
-                        }
-                    },
-                    "fields": "userEnteredFormat.numberFormat"
-                }
-            }
-        elif format_type == "currency":
-            format_request = {
-                "repeatCell": {
-                    "range": {
-                        "sheetId": sheet_id,
-                        "startColumnIndex": start_col,
-                        "endColumnIndex": end_col,
-                    },
-                    "cell": {
-                        "userEnteredFormat": {
-                            "numberFormat": {
-                                "type": "CURRENCY",
-                                "pattern": "#,##0.00"
-                            }
-                        }
-                    },
-                    "fields": "userEnteredFormat.numberFormat"
-                }
-            }
-        elif format_type == "number":
-            format_request = {
-                "repeatCell": {
-                    "range": {
-                        "sheetId": sheet_id,
-                        "startColumnIndex": start_col,
-                        "endColumnIndex": end_col,
-                    },
-                    "cell": {
-                        "userEnteredFormat": {
-                            "numberFormat": {
-                                "type": "NUMBER",
-                                "pattern": "#,##0.00"
-                            }
-                        }
-                    },
-                    "fields": "userEnteredFormat.numberFormat"
-                }
-            }
-
-        else:
-            print("Tipo de formato no soportado")
-            return
-
-        batch_update_request = {
-            "requests": [format_request]
+def format_column(self, sheet_id, format_type, start_col, end_col):
+        """Genera la estructura del request de formato sin ejecutarla."""
+        patterns = {
+            "date": {"type": "DATE", "pattern": "yyyy-mm-dd"},
+            "currency": {"type": "CURRENCY", "pattern": "#,##0.00"},
+            "number": {"type": "NUMBER", "pattern": "#,##0.00"}
         }
-        try:
-            response = service.spreadsheets().batchUpdate(
-                spreadsheetId=spreadsheet_id, 
-                body=batch_update_request
-            ).execute()
-            print(f"Formato actualizado correctamente: {response}")
-        except Exception as error:
-            print(f"Error al actualizar el formato: {error}")
+
+        if format_type not in patterns:
+            return None
+
+        return {
+            "repeatCell": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "startColumnIndex": start_col,
+                    "endColumnIndex": end_col,
+                },
+                "cell": {
+                    "userEnteredFormat": {
+                        "numberFormat": patterns[format_type]
+                    }
+                },
+                "fields": "userEnteredFormat.numberFormat"
+            }
+        }
 
 
     def upload_to_sheets(self, fieldnames: List[str], data_dicts: List[Dict[str, Union[str, int]]], column_formats: Dict[str, str], range_value: str):
@@ -122,7 +68,7 @@ class GoogleSheet:
 
         service = self._get_sheet_services()
 
-        values = [fieldnames]  # Encabezados
+        values = [fieldnames]
         for row in data_dicts:
             values.append([row[field] for field in fieldnames])
 
@@ -131,7 +77,8 @@ class GoogleSheet:
 
             sheets = sheet_metadata.get('sheets', [])
             sheet_name = sheets[0]['properties']['title']
-            range_value = f'{sheet_name}!{range_value}'
+            sheet_id = sheets[0]['properties']['sheetId']
+            full_range = f'{sheet_name}!{range_value}'
 
             body = {
                 'values': values
@@ -139,21 +86,30 @@ class GoogleSheet:
 
             request = service.spreadsheets().values().update(
                 spreadsheetId=self.spreadsheet_id,
-                range=range_value,
+                range=full_range,
                 valueInputOption="RAW",
                 body=body
             )
             response = request.execute()
 
+            requests_batch = []
             for index, field in enumerate(fieldnames):
-                format_type = column_formats.get(field, "number")
+                format_type = column_formats.get(field)
 
-                if format_type == "currency":
-                    self.format_column(self.spreadsheet_id, range_value, "currency", index, index + 1)
-                elif format_type == "date":
-                    self.format_column(self.spreadsheet_id, range_value, "date", index, index + 1)
-                elif format_type == "number":
-                    self.format_column(self.spreadsheet_id, range_value, "number", index, index + 1)
+                if format_type in ["currency", "date", "number"]:
+                    req = self.format_column(sheet_id, format_type, index, index + 1)
+                    if req:
+                        requests_batch.append(req)
+
+            if requests_batch:
+                batch_update_request = {
+                    "requests": requests_batch
+                }
+                batch_response = service.spreadsheets().batchUpdate(
+                    spreadsheetId=self.spreadsheet_id, 
+                    body=batch_update_request
+                ).execute()
+                print(f"Formatos actualizados correctamente: {batch_response}")
 
             print(f"Datos subidos correctamente: {response}")
         except Exception as error:
