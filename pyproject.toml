@@ -1,6 +1,6 @@
 [project]
 name = "google-sheet-util"
-version = "0.4.2"
+version = "0.4.3"
 description = "Google Sheet API util. Fill prev-exist sheets with data passing credentials, sheet_id, fieldnames, column_formats and data_dicts"
 readme = "README.md"
 requires-python = ">=3.13"
